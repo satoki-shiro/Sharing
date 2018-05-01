@@ -1,0 +1,50 @@
+◆前準備
+
+samba.confのworkgroupはNMR（おそらく先頭名だけ）
+
+◆JOIN
+net ads join -U administrator
+
+Check!!
+net ads info -d3
+NTP時刻合わせ。タイムゾーン含め。
+
+
+↓以下の結果の場合、DNS更新に失敗しているだけ。特に問題なし。
+net ads join -U administrator
+Enter administrator's password:
+Using short domain name -- NMR
+Joined 'CHESTER01' to dns domain 'nmr.local'
+No DNS domain configured for chester01. Unable to perform DNS Update.
+DNS update failed: NT_STATUS_INVALID_PARAMETER
+
+
+上記完了後、sssd.confを以下のように修正
+[sssd]
+domains = nmr.local
+services = nss, pam, pac
+config_file_version = 2
+[domain/NMR.LOCAL]
+id_provider = ad
+auth_provider = ad
+access_provider = ad
+chpass_provider = ad
+
+ad_server = NMR-DC.nmr.local
+# only needed if DNS discovery is not working
+ad_hostname = CHESTER01.nmr.local
+# only needed if the host name of the client machine is incorrect
+ad_domain = nmr.local
+# only needed if AD domain is named differently than SSSD domain
+
+
+sssdサービス起動前に以下のシンボリックリンクを追加
+ldd /usr/lib64/sssd/libsss_ad.so | grep not
+
+lrwxrwxrwx. 1 root root     36 Nov  4 16:15 libndr-krb5pac.so.0 -> /usr/lib64/samba/libndr-krb5pac.so.0
+lrwxrwxrwx. 1 root root     32 Nov  4 16:35 libndr-nbt.so.0 -> /usr/lib64/samba/libndr-nbt.so.0
+lrwxrwxrwx. 1 root root     28 Nov  4 16:37 libndr.so.0 -> /usr/lib64/samba/libndr.so.0
+lrwxrwxrwx. 1 root root     35 Nov  4 16:38 libsamba-util.so.0 -> /usr/lib64/samba/libsamba-util.so.0
+（※）上記4リンクはバグ？か何か知らないが、libsss_ad.so実行時のリンクで見つからないので
+　　　手動にてシンボリックリンクを作成する。
+

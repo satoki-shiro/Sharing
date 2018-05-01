@@ -1,0 +1,16 @@
+Set-DnsServerPrimaryZone ntm.local -SecondaryServers 192.168.254.200 -SecureSecondaries TransferToSecureServers
+
+Add-DnsServerSecondaryZone "nmr.local" -MasterServers "192.168.254.200" -Zonefile "nmr.local.dns"
+
+
+◆ローカル側のみの信頼関係作成
+$f=[System.DirectoryServices.ActiveDirectory.Forest]::GetCurrentForest()
+$f.CreateLocalSideOfTrustRelationship("ntm.local","Bidirectional","Lotus123-")
+
+
+◆ADユーザのエクスポート
+csvde -m -u -f export.csv -r objectCategory=user -d "OU=MyUsers,DC=nmr,DC=local"
+csvde -i -f .\export.csv
+↓エラーは必ず発生する。exportの際にパスワードはエクスポートされないから。
+エントリを読み込んでいますエラー (行 2: 実行しようとしません )
+サーバー側のエラー "パスワードを更新できませんでした。新しいパスワードとして指定された値は、パスワードの長さ、複雑さ、または履歴に関するドメインの要件を満たしていません。"

@@ -1,0 +1,29 @@
+◆ネットワークデバッグ
+C:\Users\Administrator>bcdedit /dbgsettings net hostip:192.168.254.254 port:50000
+Key=78in3a1zyr4y.2ekgqfp824o6v.4ii7knworur9.2zbc3p2v8b2i9
+
+PCI バス 0, デバイス 8, 機能 0
+
+bcdedit /set {dbgsettings} busparams 0,8,0
+
+
+
+Key=1rzseegb3tqfj.35grhm6ifgxhh.3amg8q8lscbis.1bmgruaoj2e79
+
+
+◆シリアルデバッグ
+ターゲットに以下設定
+bcdedit /debugon
+bcdedit /dbgsettings serial debugport:1 baudrate:115200
+
+VirtualboxのCOM1に以下設定
+・シリアルポート有効化
+・ポート番号COM1
+・ホストにパイプ
+・\\.\pipe\debug
+
+以下コマンド実行し、仮想マシン起動
+kd -k com:pipe,port=\\.\pipe\com1,resets=0,reconnect
+
+もしくは↓
+windbg -b -k com:pipe,port=\\.\pipe\cli01,resets=0,reconnect

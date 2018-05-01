@@ -1,0 +1,6 @@
+NMR-DC 
+ COM1
+\\.\pipe\gns3_vbox\a8ca6635-2d21-4816-ad37-d6d775f004c2
+
+NMR-CLI10-01
+\\.\pipe\gns3_vbox\e656547d-e02f-4fde-819b-559036ed7d9b
