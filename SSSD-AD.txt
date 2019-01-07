@@ -1,6 +1,19 @@
 ◆前準備
+yum install sssd realmd oddjob oddjob-mkhomedir adcli samba-common samba-common-tools krb5-workstation openldap-clients policycoreutils-python -y
+yum -y install samba-winbind samba-winbind-clients
+authconfig-tui
+
+「セキュリティモデル」－「ads」を選択
+「ドメイン」にドメイン名（例:CENTOS）を入力
+「ドメインコントローラ」にドメインコントローラーのホスト名（例:centosdc01）を入力
+「ADSレルム（Realm)」にレルム（例:CENTOS.LOCAL）を入力
+「ドメイン参加」
+
+ net ads info
+ net ads join -U Administrator
 
 samba.confのworkgroupはNMR（おそらく先頭名だけ）
+
 
 ◆JOIN
 net ads join -U administrator
