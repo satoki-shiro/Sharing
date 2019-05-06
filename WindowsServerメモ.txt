@@ -1,0 +1,18 @@
+◆パフォーマンスカウンター
+・警告データコレクター以下にログあり。
+Microsoft-Windows-Diagnosis-PLA/Operational
+
+◆Hyper-V
+Enable-WindowsOptionalFeature ?Online -FeatureName Microsoft-Hyper-V ?All -NoRestart
+
+Install-WindowsFeature RSAT-Hyper-V-Tools -IncludeAllSubFeature
+
+Install-WindowsFeature RSAT-Clustering -IncludeAllSubFeature
+
+Install-WindowsFeature Multipath-IO
+
+Restart-Computer
+
+◆Hyper-V 仮想ホスト作成
+New-VHD -Path "C:\Users\Public\Documents\Hyper-V\Virtual hard disks\NMRVSRV02.vhdx" -ParentPath "C:\Users\Public\Documents\Hyper-V\Virtual hard disks\MSTSRV.vhdx"
+New-VM -Name NMRVSRV02 -Generation 2 -MemoryStartupBytes 1GB -SwitchName NMRVSW01 -VHDPath "C:\Users\Public\Documents\Hyper-V\Virtual hard disks\NMRVSRV02.vhdx"

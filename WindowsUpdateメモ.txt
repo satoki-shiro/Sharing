@@ -1,0 +1,20 @@
+◆コマンドによるWindowsUpdate設定
+cscript c:\Windows\System32\SCregEdit.wsf /AU /v /1
+
+UsoClient StartScan
+UsoClient StartDownload
+UsoClient StartInstall
+UsoClient RestartDevice
+UsoClient ScanInstallWait
+
+◆MSUファイルの展開
+expand /f:* windows10.0-kb4103720-x64_c1fb7676d38fffae5c28b9216220c1f033ce26ac.msu C:\testdir
+pkgmgr.exe /n:C:\testdir\Windows6.1-KB958830-86.xml
+
+
+◆PowershellによるWindowsUpdate
+
+Install-Module PSWindowsUpdate
+Get-WindowsUpdate
+Install-WindowsUpdate
+

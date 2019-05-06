@@ -1,6 +1,62 @@
+◆そのほか
+cscript scregedit.wsf /AR /v
+
+
+◆ライセンス関連
+slmgr /dli
+
+◆ネットワーク関連
+- DNS
+ Set-DnsClientServerAddress -InterfaceIndex 2 -ServerAddresses "192.168.254.100"
+
+- IP
+ New-NetIPAddress -InterfaceIndex 13 -IPAddress "192.168.88.88" -AddressFamily IPv4 -PrefixLength 24 -DefaultGateway "192.168.88.1"
+
+
 Set-DnsServerPrimaryZone ntm.local -SecondaryServers 192.168.254.200 -SecureSecondaries TransferToSecureServers
 
 Add-DnsServerSecondaryZone "nmr.local" -MasterServers "192.168.254.200" -Zonefile "nmr.local.dns"
+
+◆ディスク追加
+get-disk
+Initialize-Disk -Number 1
+New-Partition -DiskNumber 1 -UseMaximumsize -AssignDriveLetter
+Format-Volume -DriveLetter E -FileSystem NTFS -NewFileSystemLabel Volume -Force
+
+◆iSCSI
+-Target
+　iSCSIターゲット機能有効化
+　　Add-WindowsFeature FS-iSCSITarget-Server
+
+　仮想ディスク作成
+　　New-IscsiVirtualDisk -Path E:\disk\storage01-hdd01.vhdx -Size 10GB
+
+　ターゲット作成
+　　New-IscsiServerTarget -TargetName TargetOfStorage01 -InitiatorIDs "IQN:iqn.2019-04:storage01-01"
+
+　iSCSIマッピング作成（iqn命名規則：　iqn.yyyy-mm.naming-authority:unique）
+　　Add-IscsiVirtualDiskTargetMapping -TargetName TargetOfStorage01 -Path E:\disk\storage01-hdd01.vhdx
+
+　　Get-IscsiServerTarget
+
+-Initiator
+　Set-Service MSiSCSI -StartupType Automatic
+　Start-Service MSiSCSI
+
+　$InitiatorNodeAddress = (Get-InitiatorPort).NodeAddress
+　Set-InitiatorPort -NodeAddress $InitiatorNodeAddress -NewNodeAddress iqn.2019-04:storage01-01
+　New-IscsiTargetPortal -TargetPortalAddress 192.168.254.230 -InitiatorPortalAddress 192.168.254.210
+　$TargetNodeAddress = (Get-IscsiTarget).NodeAddress
+　Connect-IscsiTarget -NodeAddress $TargetNodeAddress -TargetPortalAddress 192.168.254.230 -InitiatorPortalAddress 192.168.254.210 -IsPersistent $true
+　
+  Set-disk -number 1 -IsOffline $false
+
+-Initiator Remove
+ Remove-IscsiTargetPortal -TargetPortalAddress 192.168.254.230 -InitiatorPortalAddress 192.168.254.210
+
+◆クラスタ
+1. Install-WindowsFeature -Name Failover-Clustering -IncludeManagementTools
+2. 
 
 
 ◆ローカル側のみの信頼関係作成

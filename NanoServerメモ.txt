@@ -1,0 +1,80 @@
+◆NanoServer（※要 Windows ADK。展開ツールコマンドプロンプトより起動する（dismへのパスが必要））
+1. ISOイメージマウント
+2. NanoServerImageGeneratorディレクトリのコピー
+3. Import-Module .\NanoServerImageGenerator -Verbose
+4．New-NanoServerImage -Edition Standard -DeploymentType Host -MediaPath D: -TargetPath '..\VirtualBox VMs\nanolink01.vhd' -ComputerName nanolink01 -OemDrivers
+
+
+◆NanoServer Domain Join
+- Domain Controller
+ djoin.exe /provision /domain SOLID.COM /machine nanolink01 /savefile .\nanolink01
+
+- Nano Server
+ djoin /requestodj /loadfile C:\users\Administrator\nanolink01 /windowspath c:\windows /localos
+
+◆NanoServer IIS
+mkdir mountdir
+.\Tools\dism.exe /Mount-Image /ImageFile:.\NanoServer.vhd /Index:1 /MountDir:.\mountdir
+.\Tools\dism.exe /Add-Package /PackagePath:.\packages\Microsoft-NanoServer-IIS-Package.cab /Image:.\mountdir
+.\Tools\dism.exe /Add-Package /PackagePath:.\packages\ja-JP\Microsoft-NanoServer-IIS-Package_ja-JP.cab /Image:.\mountdir
+.\Tools\dism.exe /Unmount-Image /MountDir:.\MountDir /Commit
+
+
+◆NanoServer Storage
+mkdir mountdir
+.\Tools\dism.exe /Mount-Image /ImageFile:.\NanoServer.vhd /Index:1 /MountDir:.\mountdir
+.\Tools\dism.exe /Add-Package /PackagePath:.\packages\Microsoft-NanoServer-Storage-Package.cab /Image:.\mountdir
+.\Tools\dism.exe /Add-Package /PackagePath:.\packages\ja-JP\Microsoft-NanoServer-Storage-Package_ja-JP.cab /Image:.\mountdir
+.\Tools\dism.exe /Unmount-Image /MountDir:.\MountDir /Commit
+
+
+◆コンテナー
+1. Enable-WindowsOptionalFeature -Online -FeatureName Containers
+2. Install-Module -Name DockerMsftProvider -Repository PSGallery -Force
+
+続行するには NuGet プロバイダーが必要です
+PowerShellGet で NuGet ベースのリポジトリを操作するには、'2.8.5.201' 以降のバージョンの NuGet
+プロバイダーが必要です。NuGet プロバイダーは 'C:\Program Files\PackageManagement\ProviderAssemblies' または
+'C:\Users\administrator.SOLID\AppData\Local\PackageManagement\ProviderAssemblies'
+に配置する必要があります。'Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force' を実行して NuGet
+プロバイダーをインストールすることもできます。今すぐ PowerShellGet で NuGet
+プロバイダーをインストールしてインポートしますか?
+[Y] はい(Y)  [N] いいえ(N)  [S] 中断(S)  [?] ヘルプ (既定値は "Y"): Y
+
+3. Install-Module -Name DockerMsftProvider -Repository PSGallery -Force
+4. Install-Package -Name docker -ProviderName DockerMsftProvider -Verbose
+
+
+docker run microsoft/dotnet-samples:dotnetapp-nanoserver-sac2016
+powershell new-item c:\build\Dockerfile -Force
+　★Dockerfile
+　　FROM microsoft/iis
+　　RUN echo "Hello World - Dockerfile" > c:\inetpub\wwwroot\index.html
+docker build -t <user>/iis-dockerfile c:\Build
+docker images
+
+
+docker-machine create --driver virtualbox dev-01
+
+$ docker-machine ls
+NAME     ACTIVE   DRIVER       STATE     URL                         SWARM
+dev-01   *        virtualbox   Running   tcp://192.168.99.100:2376
+dev-02            virtualbox   Running   tcp://192.168.99.101:2376
+
+# アクティブなマシンを dev-02 にセット
+$ eval "$(docker-machine env dev-02)"
+
+$ docker-machine ls
+NAME     ACTIVE   DRIVER       STATE     URL                         SWARM
+dev-01            virtualbox   Running   tcp://192.168.99.100:2376
+dev-02   *        virtualbox   Running   tcp://192.168.99.101:2376
+docker run -d -p 80:80 <user>/iis-dockerfile ping -t localhost
+docker inspect -f "{{ .NetworkSettings.Networks.nat.IPAddress }}" eff17b0bba02
+docker inspect -s eff17b0bba02
+docker stop <container name>
+docker rm -f <container name>
+
+
+
+
+

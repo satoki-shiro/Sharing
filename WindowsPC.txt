@@ -1,0 +1,15 @@
+◆ISOブータブルUSBメモリ作成
+diskpart
+diskpart> clean
+diskpart> create partition primary
+diskpart> select partition 1
+diskpart> active
+diskpart> format fs=ntfs quick
+diskpart> assign
+
+mount ISO Image
+
+xcopy E:\*.* /S /E /F F:\
+
+cd E:\boot
+bootsect /nt60 F:
