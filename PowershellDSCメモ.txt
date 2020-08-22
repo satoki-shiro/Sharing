@@ -2,3 +2,32 @@ powershell DSCメモ
 
 リモートDSCする場合、プッシュ元と先でPowershellの
 バージョンが合っていないとプロパティ未定義エラーが出る
+
+構成に失敗・ペンディングしたら、↓コマンド実行
+Remove-DscConfigurationDocument -Stage Pending
+
+1. File Copy
+
+2. Software Deployment
+HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall
+の各値を入力
+        Package BasicPackage
+        {
+            Ensure = "Present"
+            Name = "Microsoft Edge" ← DisplayName
+            Path = "C:\Setup\MicrosoftEdgeEnterpriseX64.msi"
+            ProductId= "3196C85D-CFB0-3E5B-A592-0322692C2140" ←Uninstall直下のGUID
+        }
+  
+        Package Sakura
+        {
+            Ensure = "Present"
+            Name = "sakura editor(サクラエディタ)"
+            Path = "C:\Setup\sakura_install2-4-1-2849-x86.exe"
+            ProductId = ""
+            Arguments = "/VERYSILENT /SP-" # args for silent mode
+         }
+
+3. Install Feature
+
+4. 

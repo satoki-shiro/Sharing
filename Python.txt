@@ -1,0 +1,2 @@
+◆pip使い方
+python -m pip install xxx
